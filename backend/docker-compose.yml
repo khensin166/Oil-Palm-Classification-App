@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - MODEL_PATH=models/model_mobilenetv2_sawit.keras
+      - CLASS_NAMES_PATH=models/class_names.json
