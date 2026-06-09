@@ -5,9 +5,6 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from .model_loader import model_manager
 from .utils import get_description
 
-CONFIDENCE_THRESHOLD = 0.70
-MARGIN_THRESHOLD = 0.15
-
 def process_image(image_bytes: bytes) -> np.ndarray:
     # Open image using PIL
     image = Image.open(io.BytesIO(image_bytes))
@@ -47,18 +44,10 @@ def interpret_prediction(prediction_scores, class_names):
     top_index = sorted_indices[0]
     top_label = class_names[top_index]
     top_confidence = float(prediction_scores[top_index])
-    
-    if len(sorted_indices) > 1:
-        second_index = sorted_indices[1]
-        second_confidence = float(prediction_scores[second_index])
-    else:
-        second_confidence = 0.0
-        
-    margin = top_confidence - second_confidence
     top_confidence_percent = f"{top_confidence * 100:.2f}%"
     description = None if top_label.lower() == "unknown" else get_description(top_label)
 
-    # Validasi 1: Label unknown
+    # Jika model prediksi unknown
     if top_label.lower() == "unknown":
         return {
             "success": True,
@@ -71,33 +60,7 @@ def interpret_prediction(prediction_scores, class_names):
             "all_predictions": all_predictions
         }
         
-    # Validasi 2: Confidence rendah
-    if top_confidence < CONFIDENCE_THRESHOLD:
-        return {
-            "success": True,
-            "is_valid": False,
-            "prediction": top_label,
-            "confidence": top_confidence,
-            "confidence_percent": top_confidence_percent,
-            "message": "Model belum cukup yakin. Silakan foto ulang dengan gambar yang lebih jelas.",
-            "description": None,
-            "all_predictions": all_predictions
-        }
-        
-    # Validasi 3: Prediksi ambigu (margin kecil)
-    if margin < MARGIN_THRESHOLD:
-        return {
-            "success": True,
-            "is_valid": False,
-            "prediction": top_label,
-            "confidence": top_confidence,
-            "confidence_percent": top_confidence_percent,
-            "message": "Prediksi masih ambigu karena score antar kelas terlalu dekat.",
-            "description": None,
-            "all_predictions": all_predictions
-        }
-        
-    # Lolos validasi
+    # Prediksi berhasil
     return {
         "success": True,
         "is_valid": True,
