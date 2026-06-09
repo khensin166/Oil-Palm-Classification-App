@@ -10,20 +10,14 @@ class ModelManager:
     def load_model_and_classes(self, model_path: str, class_names_path: str):
         print(f"Loading model from {model_path}...")
         if os.path.exists(model_path):
-            from tensorflow.keras.layers import InputLayer, Dense
+            from tensorflow.keras.layers import Dense
             
-            class SafeInputLayer(InputLayer):
-                def __init__(self, **kwargs):
-                    kwargs.pop('batch_shape', None)
-                    kwargs.pop('optional', None)
-                    super().__init__(**kwargs)
-                    
             class SafeDense(Dense):
                 def __init__(self, **kwargs):
                     kwargs.pop('quantization_config', None)
                     super().__init__(**kwargs)
                     
-            with tf.keras.utils.custom_object_scope({'InputLayer': SafeInputLayer, 'Dense': SafeDense}):
+            with tf.keras.utils.custom_object_scope({'Dense': SafeDense}):
                 self.model = tf.keras.models.load_model(model_path, compile=False)
             
             print("Model loaded successfully.")
