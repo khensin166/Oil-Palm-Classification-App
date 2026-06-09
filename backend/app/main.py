@@ -24,7 +24,7 @@ app.add_middleware(
 # Load model on startup
 @app.on_event("startup")
 async def startup_event():
-    model_path = os.getenv("MODEL_PATH", "models/model_mobilenetv2_sawit.keras")
+    model_path = os.getenv("MODEL_PATH", "models/model_mobilenetv2_sawit.h5")
     class_names_path = os.getenv("CLASS_NAMES_PATH", "models/class_names.json")
     model_manager.load_model_and_classes(model_path, class_names_path)
 
